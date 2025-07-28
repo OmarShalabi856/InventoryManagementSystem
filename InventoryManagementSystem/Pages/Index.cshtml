@@ -1,0 +1,140 @@
+﻿@page
+@{
+    ViewData["Title"] = "Inventory Items";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6 text-center">Inventory</h2>
+
+        <div class="flex gap-4 mb-6">
+            <input type="text" id="searchName" placeholder="Search by name"
+                   class="px-4 py-2 border rounded w-full" />
+            <input type="text" id="searchCategory" placeholder="Search by category"
+                   class="px-4 py-2 border rounded w-full" />
+            <button onclick="loadItems()"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                Search
+            </button>
+            <button onclick="location.href='/Items/Create'"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                Add New
+            </button>
+        </div>
+
+        <table class="min-w-full bg-white shadow-md rounded">
+            <thead>
+                <tr class="bg-gray-200 text-left">
+                    <th class="py-3 px-4">Name</th>
+                    <th class="py-3 px-4">Quantity</th>
+                    <th class="py-3 px-4">Price</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Category</th>
+                    <th class="py-3 px-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="itemsTable" class="divide-y divide-gray-100"></tbody>
+        </table>
+
+        <!-- Chatbot Section -->
+        <div class="mt-12 p-6 bg-white rounded shadow max-w-xl mx-auto">
+            <h3 class="text-xl font-semibold mb-4">Chat with Inventory Assistant</h3>
+            <textarea id="chatInput" rows="3" placeholder="Ask about inventory..."
+                      class="w-full px-4 py-2 border rounded resize-none"></textarea>
+            <button id="sendChat"
+                    class="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
+                Send
+            </button>
+            <div id="chatResponse" class="mt-4 p-4 bg-gray-50 border rounded min-h-[80px] whitespace-pre-wrap"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadItems() {
+            const name = document.getElementById("searchName").value;
+            const category = document.getElementById("searchCategory").value;
+            const url = `/api/item/search?name=${encodeURIComponent(name)}&category=${encodeURIComponent(category)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            const table = document.getElementById("itemsTable");
+            table.innerHTML = "";
+
+            data.forEach(item => {
+                const row = document.createElement("tr");
+                row.className = "hover:bg-gray-50";
+                row.innerHTML = `
+                    <td class="py-2 px-4">${item.name}</td>
+                    <td class="py-2 px-4">${item.quantity}</td>
+                    <td class="py-2 px-4">$${item.price.toFixed(2)}</td>
+                    <td class="py-2 px-4">${item.status}</td>
+                    <td class="py-2 px-4">${item.category ?? ''}</td>
+                    <td class="py-2 px-4 space-x-2">
+                        <button onclick="viewItem('${item.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">View</button>
+                        <button onclick="editItem('${item.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">Edit</button>
+                        <button onclick="deleteItem('${item.id}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                    </td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+               function viewItem(id) {
+            location.href = `/View?id=${id}`;
+        }
+
+        function editItem(id) {
+            location.href = `/Edit?id=${id}`;
+        }
+
+        function deleteItem(id) {
+            location.href = `/Delete?id=${id}`;
+        }
+
+
+        async function deleteItem(id) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                const res = await fetch(`/api/item/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    document.getElementById("itemsTable").innerHTML = "";
+                    await loadItems();
+                }
+                else alert("Delete failed.");
+            }
+        }
+
+        // Chatbot send handler
+        document.getElementById("sendChat").addEventListener("click", async () => {
+            const input = document.getElementById("chatInput");
+            const responseDiv = document.getElementById("chatResponse");
+            const question = input.value.trim();
+            if (!question) return;
+
+            responseDiv.textContent = "Loading...";
+
+            try {
+                const res = await fetch('/api/item/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(question)
+                });
+                if (!res.ok) throw new Error("API error");
+
+                const data = await res.json();
+                responseDiv.textContent = data.answer ?? "No response.";
+            } catch (error) {
+                responseDiv.textContent = "Error: " + error.message;
+            }
+        });
+
+        window.onload = loadItems;
+    </script>
+</body>
+</html>

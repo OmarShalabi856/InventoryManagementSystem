@@ -1,0 +1,70 @@
+﻿@page
+@{
+    ViewData["Title"] = "Edit Item";
+}
+
+<h2>Edit Item</h2>
+
+<form id="editForm" class="space-y-4">
+    <input type="hidden" id="id" />
+    <input type="text" id="name" placeholder="Name" class="border p-2 w-full" />
+    <textarea id="description" placeholder="Description" class="border p-2 w-full"></textarea>
+    <input type="number" id="quantity" placeholder="Quantity" class="border p-2 w-full" />
+    <input type="number" id="price" placeholder="Price" class="border p-2 w-full" />
+    <input type="text" id="category" placeholder="Category" class="border p-2 w-full" />
+    <select id="status" class="border p-2 w-full">
+        <option value="InStock">In Stock</option>
+        <option value="OutOfStock">Out Of Stock</option>
+        <option value="Discontinued">Discontinued</option>
+    </select>
+    <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded">Update</button>
+</form>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    async function loadItem() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+
+        const res = await fetch(`/api/item/${id}`);
+        const item = await res.json();
+
+        document.getElementById("id").value = item.id;
+        document.getElementById("name").value = item.name;
+        document.getElementById("description").value = item.description;
+        document.getElementById("quantity").value = item.quantity;
+        document.getElementById("price").value = item.price;
+        document.getElementById("category").value = item.category;
+        document.getElementById("status").value = item.status;
+    }
+
+    document.getElementById("editForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const id = document.getElementById("id").value;
+    const data = {
+        id,
+        name: document.getElementById("name").value,
+        description: document.getElementById("description").value,
+        quantity: parseInt(document.getElementById("quantity").value),
+        price: parseFloat(document.getElementById("price").value),
+        category: document.getElementById("category").value,
+        status: document.getElementById("status").value // make sure this exactly matches enum names like "InStock"
+    };
+
+    const res = await fetch(`/api/item/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+
+
+    if (res.ok) {
+        alert("Item updated!");
+        location.href = '/Items'; // Adjust this to your index page URL
+    } else {
+        const error = await res.text();
+        alert("Update failed: " + error);
+    }
+    });
+
+    window.onload = loadItem;
+</script>

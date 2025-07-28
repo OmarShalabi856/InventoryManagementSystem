@@ -1,0 +1,39 @@
+﻿@page
+@model InventoryManagementSystem.Pages.ViewModel
+@{
+    ViewData["Title"] = "View Item";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>View Item</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+        <h2 class="text-2xl font-bold mb-4">View Item</h2>
+
+        <div>
+            <p><strong>Name:</strong> @Model.Item?.Name</p>
+            <p><strong>Description:</strong> @Model.Item?.Description</p>
+            <p><strong>Quantity:</strong> @Model.Item?.Quantity</p>
+            <p><strong>Price:</strong> $@Model.Item?.Price.ToString("F2")</p>
+            <p><strong>Status:</strong> @Model.Item?.Status</p>
+            <p><strong>Category:</strong> @Model.Item?.Category</p>
+        </div>
+
+        <div class="mt-6">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    onclick="location.href='/'">
+                Back to List
+            </button>
+            <button class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 ml-2"
+                    onclick="location.href='/Edit?id=@Model.Item?.Id'">
+                Edit
+            </button>
+        </div>
+    </div>
+</body>
+</html>

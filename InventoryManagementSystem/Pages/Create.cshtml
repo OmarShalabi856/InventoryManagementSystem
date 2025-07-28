@@ -1,0 +1,57 @@
+﻿@page "Create"
+@{
+    ViewData["Title"] = "Create Item";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Create Item</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h2 class="text-2xl font-bold mb-6 text-center">Create New Item</h2>
+
+        <form id="createForm" class="space-y-4">
+            <input type="text" placeholder="Name" id="name" class="w-full px-4 py-2 border rounded" required />
+            <input type="number" placeholder="Quantity" id="quantity" class="w-full px-4 py-2 border rounded" required />
+            <input type="number" placeholder="Price" id="price" class="w-full px-4 py-2 border rounded" step="0.01" required />
+            <input type="text" placeholder="Status" id="status" class="w-full px-4 py-2 border rounded" required />
+            <input type="text" placeholder="Category" id="category" class="w-full px-4 py-2 border rounded" />
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded">Create</button>
+        </form>
+
+        <div class="mt-4">
+            <a href="/Items" class="text-blue-500">Back to Inventory</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("createForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const item = {
+                name: document.getElementById("name").value,
+                quantity: parseInt(document.getElementById("quantity").value),
+                price: parseFloat(document.getElementById("price").value),
+                status: document.getElementById("status").value,
+                category: document.getElementById("category").value
+            };
+
+            const res = await fetch("/api/item", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(item)
+            });
+
+            if (res.ok) {
+                location.href = "/Items";
+            } else {
+                alert("Failed to create item.");
+            }
+        });
+    </script>
+</body>
+</html>
