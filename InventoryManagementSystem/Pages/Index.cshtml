@@ -23,7 +23,7 @@
                     class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                 Search
             </button>
-            <button onclick="location.href='/Items/Create'"
+            <button onclick="goToCreate()"
                     class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
                 Add New
             </button>
@@ -96,6 +96,10 @@
 
         function deleteItem(id) {
             location.href = `/Delete?id=${id}`;
+        }
+
+                function goToCreate() {
+          location.href = '/Create';
         }
 
 
